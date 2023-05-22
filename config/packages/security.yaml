@@ -20,8 +20,8 @@ security:
                 path: app_logout
                 csrf_parameter: token
                 csrf_token_generator: security.csrf.token_manager
-            #login_throttling:
-            #    max_attempts: 5
+            login_throttling:
+                max_attempts: 5
                 # where to redirect after logout
                 # target: app_any_route
 
