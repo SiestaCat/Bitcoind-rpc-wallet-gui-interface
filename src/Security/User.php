@@ -7,7 +7,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    private $username;
+    private $username = 'none'; //only password login without username
 
     private $roles = [];
 
