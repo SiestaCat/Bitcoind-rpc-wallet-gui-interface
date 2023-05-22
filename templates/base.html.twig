@@ -17,6 +17,8 @@
         {% if is_granted('ROLE_USER') %}
             <a href="{{ path('app_logout', {'token' : csrf_token('logout')}) }}">LOGOUT</a>
         {% endif %}
-        {% block body %}{% endblock %}
+        <div class="container">
+            {% block body %}{% endblock %}
+        </div>
     </body>
 </html>
