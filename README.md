@@ -9,13 +9,6 @@ Basic bitcoin rpc client for wallets with symfony 6.
 - Show BTC balance
 - Send (in progress..)
 
-## Screenshoots
-
-![localhost_8000_](https://github.com/SiestaCat/Bitcoind-rpc-wallet-gui-interface/assets/53893905/0343ca2f-61cb-459f-9882-5698b883eb52)
-![localhost_8000_wallet_form_create](https://github.com/SiestaCat/Bitcoind-rpc-wallet-gui-interface/assets/53893905/92aa5875-a088-4ba8-bf2b-4316930c9637)
-![localhost_8000_wallet_show_mario](https://github.com/SiestaCat/Bitcoind-rpc-wallet-gui-interface/assets/53893905/3dc6cc36-f5ae-4236-aa26-cb8f47756a94)
-
-
 ## Requirements
 
 - PHP 8
@@ -43,3 +36,10 @@ Run on local server
 ```
 php -S 0.0.0.0:8000 -t public
 ```
+
+## Screenshoots
+
+![localhost_8000_login](https://github.com/SiestaCat/Bitcoind-rpc-wallet-gui-interface/assets/53893905/87ce3362-d873-4aed-9ab0-d8a9c32ab047)
+![localhost_8000_](https://github.com/SiestaCat/Bitcoind-rpc-wallet-gui-interface/assets/53893905/0343ca2f-61cb-459f-9882-5698b883eb52)
+![localhost_8000_wallet_form_create](https://github.com/SiestaCat/Bitcoind-rpc-wallet-gui-interface/assets/53893905/92aa5875-a088-4ba8-bf2b-4316930c9637)
+![localhost_8000_wallet_show_mario](https://github.com/SiestaCat/Bitcoind-rpc-wallet-gui-interface/assets/53893905/3dc6cc36-f5ae-4236-aa26-cb8f47756a94)
