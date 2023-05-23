@@ -30,12 +30,7 @@ class WalletApi
 
         foreach($listwallets as $wallet_name)
         {
-            $wallet = new Wallet;
-            $wallet->name = $wallet_name;
-            $wallet->is_loaded = true;
-            $getbalances = $this->client->callWallet($wallet_name, 'getbalances');
-            //dump($getbalances); die();
-            $wallets[$wallet_name] = $wallet;
+            $wallets[$wallet_name] = $this->get($wallet_name);
         }
 
         //Not loaded wallets
@@ -55,6 +50,23 @@ class WalletApi
         }
 
         return array_values($wallets);
+    }
+
+    public function get(string $wallet_name):Wallet
+    {
+        $wallet = new Wallet;
+        $wallet->name = $wallet_name;
+        $wallet->is_loaded = true;
+        $wallet->addresses = $this->getaddressesbylabel($wallet_name);
+
+        $getbalances = $this->client->callWallet($wallet_name, 'getbalances');
+        if(property_exists($getbalances, 'mine'))
+        {
+            $balances_mine = $getbalances->mine;
+            if(property_exists($balances_mine, 'trusted')) $wallet->balance_available = $balances_mine->trusted;
+            if(property_exists($balances_mine, 'untrusted_pending')) $wallet->balance_pending = $balances_mine->untrusted_pending;
+        }
+        return $wallet;
     }
 
     /**

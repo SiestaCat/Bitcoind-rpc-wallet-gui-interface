@@ -71,6 +71,10 @@ class Client
 
         $json_decoded = json_decode($response);
 
+        //Convert int and float to string
+
+        $json_decoded = $json_decoded === false ? false : (json_decode(preg_replace('/\: *([0-9]+\.?[0-9e+\-]*)/', ':"\\1"', $response)));
+
         if(!is_object($json_decoded)) throw new JsonDecodeException('Unable to decode JSON result. Curl response: ' . $response);
 
         if(property_exists($json_decoded, 'error') && $json_decoded->error !== null) throw new \Exception(json_encode($json_decoded->error));

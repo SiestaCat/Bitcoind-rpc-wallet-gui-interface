@@ -1,15 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Wallet {{ wallet_name }}{% endblock %}
+{% block title %}Wallet {{ wallet.name }}{% endblock %}
 
 {% block body %}
-    <h2>Wallet {{ wallet_name }}</h2>
+    <h2>Wallet {{ wallet.name }}</h2>
     {% include 'flash.html.twig' %}
+    <h3>Balances</h3>
+    <div class="card">
+        <div class="card-body">
+            <p class="mb-1">
+                <b>BTC</b> {{ wallet.balance_available }} available<br>
+                <b>BTC</b> {{ wallet.balance_pending }} pending
+            </p>
+        </div>
+    </div>
     <h3>Addresses</h3>
     <div class="card">
         <div class="card-body">
-            <form method="post" action="{{ path('app_wallet_generate_address', {'wallet_name': wallet_name}) }}">
-                <input type="hidden" name="_token" value="{{ csrf_token('generate_address' ~ wallet_name) }}">
+            <form method="post" action="{{ path('app_wallet_generate_address', {'wallet_name': wallet.name}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('generate_address' ~ wallet.name) }}">
                 <button type="submit" class="btn btn-primary">Create new address</button>
                 {% for i,address_type in ['legacy', 'p2sh-segwit', 'bech32'] %}
                 <div class="form-check form-check-inline">
@@ -21,12 +30,12 @@
             </form>
         </div>
     </div>
-    {% if addresses|length == 0 %}
+    {% if wallet.addresses|length == 0 %}
         <div class="alert alert-warning mt-3" role="alert">
             No addresses
         </div>
     {% endif %}
-    {% for address in addresses %}
+    {% for address in wallet.addresses %}
     <div class="card mt-3">
         <div class="row g-0">
             <div class="col-md-4">

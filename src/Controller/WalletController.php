@@ -15,8 +15,7 @@ class WalletController extends AbstractController
     public function show(string $wallet_name, WalletApi $walletApi): Response
     {
         return $this->render('wallet/show.html.twig', [
-            'wallet_name' => $wallet_name,
-            'addresses' => $walletApi->getaddressesbylabel($wallet_name)
+            'wallet' => $walletApi->get($wallet_name)
         ]);
     }
 
