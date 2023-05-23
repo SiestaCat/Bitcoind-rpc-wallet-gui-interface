@@ -1,13 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Wallets{% endblock %}
+{% block title %}Create new wallet{% endblock %}
 
 {% block body %}
-    <h2>Wallets</h2>
+    <h2>Create new wallet</h2>
     {% include 'flash.html.twig' %}
     <div class="card">
         <div class="card-body">
-            <a href="{{ path('app_wallet_form_create') }}" class="btn btn-primary">Create new wallet</a>
+            {{ form_start(form) }}
+            {{ form_end(form) }}
         </div>
     </div>
 {% endblock %}
