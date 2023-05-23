@@ -21,7 +21,7 @@ Basic bitcoin rpc client for wallets with symfony 6.
 ./bitcoind -prune=1024 -server -rest -rpcauth='user:77ba8bfe64e771ef76fc72a02ccf12bf$dad5b22c0503beb0945d723b9f267924131daac28653a0076e468533240b6193' -disablewallet=0
 ```
 
-Hashed password `77ba8bfe64e771ef76fc72a02ccf12bf$dad5b22c0503beb0945d723b9f267924131daac28653a0076e468533240b6193` is user
+For this example, hashed password `77ba8bfe64e771ef76fc72a02ccf12bf$dad5b22c0503beb0945d723b9f267924131daac28653a0076e468533240b6193` is `user`
 
 ## Install
 ```
