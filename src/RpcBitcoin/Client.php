@@ -9,23 +9,13 @@ class Client
 
     const JSON_RPC = '1.0';
 
-    public function __construct(private string $rpc_hostname, private int $rpc_port, private string $rpc_username, private string $rpc_password, private bool $rpc_is_https = false)
-    {
-        
-    }
-
-    public function listwallets():array|bool
-    {
-        $result = $this->call('listwallets');
-
-        return is_array($result) ? $result : false;
-    }
+    public function __construct(private string $rpc_hostname, private int $rpc_port, private string $rpc_username, private string $rpc_password, private bool $rpc_is_https)
+    {}
 
     public function call(string $method, array $params = []):mixed
     {
         return $this->make_curl_call($method, $params);
     }
-
 
     public function isUp():bool
     {
@@ -49,9 +39,11 @@ class Client
      * @param array $params 
      * @return string|array|bool|null
      */
-    protected function make_curl_call(string $method, array $params = []):mixed
+    private function make_curl_call(string $method, array $params = []):mixed
     {
-        $ch = curl_init("http://127.0.0.1:8332/");
+        $url = sprintf('http%s://%s:%s/', ($this->rpc_is_https ? 's' : ''), $this->rpc_hostname, $this->rpc_port);
+
+        $ch = curl_init($url);
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: text/plain',
@@ -66,11 +58,15 @@ class Client
 
         $response = curl_exec($ch);
 
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
         curl_close($ch);
+
+        if($httpcode === 401) throw new AuthException('Invalid login');
 
         $json_decoded = json_decode($response);
 
-        if(!is_object($json_decoded)) throw new \Exception('Unable to decode JSON result. Result: ' . $response);
+        if(!is_object($json_decoded)) throw new JsonDecodeException('Unable to decode JSON result. Curl response: ' . $response);
 
         return $json_decoded->result;
     }
