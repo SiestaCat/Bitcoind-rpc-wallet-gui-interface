@@ -12,8 +12,8 @@ import './styles/global.scss';
 // start the Stimulus application
 import './bootstrap';
 
-const $ = require('jquery');
+global.$ = global.jQuery = require('jquery');
 
-global.$ = global.jQuery = $;
+global.Cookies = require('js-cookie');
 
 window.appLoaded = true;
