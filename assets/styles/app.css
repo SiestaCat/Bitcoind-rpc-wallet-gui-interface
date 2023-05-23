@@ -1,0 +1,6 @@
+.btn-sm2
+{
+    --bs-btn-padding-y: .25rem !important;
+    --bs-btn-padding-x: .5rem !important;
+    --bs-btn-font-size: .75rem !important;
+}

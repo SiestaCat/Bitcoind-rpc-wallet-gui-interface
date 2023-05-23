@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Wallet {{ wallet_name }}{% endblock %}
+
+{% block body %}
+    <h2>Wallet {{ wallet_name }}</h2>
+    {% include 'flash.html.twig' %}
+    <h3>Addresses</h3>
+    <div class="card">
+        <div class="card-body">
+            <form method="post" action="{{ path('app_wallet_generate_address', {'wallet_name': wallet_name}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('generate_address' ~ wallet_name) }}">
+                <button type="submit" class="btn btn-primary">Create new address</button>
+                {% for i,address_type in ['legacy', 'p2sh-segwit', 'bech32'] %}
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="address_type" id="address_type{{ i }}" value="{{ address_type }}">
+                    <label class="form-check-label" for="address_type{{ i }}">{{ address_type }}</label>
+                </div>
+                {% endfor %}
+                
+            </form>
+        </div>
+    </div>
+    {% if addresses|length == 0 %}
+        <div class="alert alert-warning mt-3" role="alert">
+            No addresses
+        </div>
+    {% endif %}
+    {% for address in addresses %}
+    <div class="card mt-3">
+        <div class="row g-0">
+            <div class="col-md-4">
+            <img src="{{ qr_service.toSrc(address) }}" class="img-fluid rounded-start">
+            </div>
+            <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title">{{ address }}</h5>
+            </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}

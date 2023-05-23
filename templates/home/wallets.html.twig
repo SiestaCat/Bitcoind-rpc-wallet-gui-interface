@@ -10,4 +10,29 @@
             <a href="{{ path('app_wallet_form_create') }}" class="btn btn-primary">Create new wallet</a>
         </div>
     </div>
+    {% if wallets|length == 0 %}
+        <div class="alert alert-warning" role="alert">
+            No wallets
+        </div>
+    {% endif %}
+    {% if wallets|length > 0 %}
+        <div class="list-group mt-3">
+            {% for wallet in wallets %}
+            <a {% if wallet.is_loaded %} href="{{ path('app_wallet_show', {'wallet_name' : wallet.name}) }}" {% endif %} class="list-group-item list-group-item-action" aria-current="true">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">{{ wallet.name }}</h6>
+                </div>
+                <p class="mb-1">Some placeholder content in a paragraph.</p>
+                {% if not wallet.is_loaded %}
+                <span class="badge text-bg-warning">Not loaded</span>
+                <button type="button" onclick="document.getElementById('load_wallet_{{ wallet.name }}').submit();" class="btn btn-primary btn-sm2 ms-3">Load wallet</button>
+                <form id="load_wallet_{{ wallet.name }}" class="d-none ms-2" method="post" action="{{ path('app_wallet_load', {'wallet_name': wallet.name}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('load_wallet' ~ wallet.name) }}">
+                </form>
+                {% endif %}
+                
+            </a>
+            {% endfor %}
+        </div>
+    {% endif %}
 {% endblock %}

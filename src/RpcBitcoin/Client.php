@@ -17,6 +17,11 @@ class Client
         return $this->make_curl_call($method, $params);
     }
 
+    public function callWallet(string $wallet_name, string $method, array $params = []):mixed
+    {
+        return $this->make_curl_call($method, $params, ('wallet/' . $wallet_name));
+    }
+
     public function isUp():bool
     {
         $connection = @fsockopen($this->rpc_hostname, $this->rpc_port, $null, $null, self::SOCK_TIMEOUT);
@@ -39,9 +44,9 @@ class Client
      * @param array $params 
      * @return string|array|bool|null
      */
-    private function make_curl_call(string $method, array $params = []):mixed
+    private function make_curl_call(string $method, array $params = [], ?string $sufix = null):mixed
     {
-        $url = sprintf('http%s://%s:%s/', ($this->rpc_is_https ? 's' : ''), $this->rpc_hostname, $this->rpc_port);
+        $url = sprintf('http%s://%s:%s/', ($this->rpc_is_https ? 's' : ''), $this->rpc_hostname, $this->rpc_port) . $sufix;
 
         $ch = curl_init($url);
 

@@ -3,6 +3,7 @@ twig:
     form_themes: ['bootstrap_5_layout.html.twig']
     globals:
         rpc_client: '@App\RpcBitcoin\Client'
+        qr_service: '@App\Service\QrCodeGenerator'
 
 when@test:
     twig:
