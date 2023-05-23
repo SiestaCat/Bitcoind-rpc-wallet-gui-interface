@@ -15,6 +15,14 @@ Basic bitcoin rpc client for wallets with symfony 6.
 - Composer
 - NPM
 
+## Bitcoind rpc example
+
+```
+./bitcoind -prune=1024 -server -rest -rpcauth='user:77ba8bfe64e771ef76fc72a02ccf12bf$dad5b22c0503beb0945d723b9f267924131daac28653a0076e468533240b6193' -disablewallet=0
+```
+
+Hashed password `77ba8bfe64e771ef76fc72a02ccf12bf$dad5b22c0503beb0945d723b9f267924131daac28653a0076e468533240b6193` is user
+
 ## Install
 ```
 git clone git@github.com:SiestaCat/Bitcoind-rpc-wallet-gui-interface.git
@@ -25,17 +33,22 @@ composer dump-env prod
 npm run build
 ```
 
-Generate login password, select option [0] and paste it to LOGIN_PASSWORD env var in file .env.local.php
+### Configure env vars
+
+Edit `.env.local.php` and fill the RCP hostname, port, username and password
+
+#### Generate login password, select option [0] and paste it to `LOGIN_PASSWORD`
 
 ```
 php bin/console security:hash-password
 ```
 
-Run on local server
+### Run on local server
 
 ```
 php -S 0.0.0.0:8000 -t public
 ```
+Open in browser https://localhost:8000/
 
 ## Screenshoots
 
