@@ -1,36 +1,64 @@
 <div class="card">
     <div class="card-body">
         RPC Status:
-        <span class="badge rounded-pill text-bg-warning rpc_status">Checking...</span>
+        <span id="rpc_status_checking" class="badge rounded-pill text-bg-warning rpc_status">Checking...</span>
         <span id="rpc_status_up" class="badge rounded-pill text-bg-success rpc_status" style="display:none;">UP</span>
         <span id="rpc_status_down" class="badge rounded-pill text-bg-danger rpc_status" style="display:none;">DOWN</span>
+        <span id="rpc_status_unknow" class="badge rounded-pill text-bg-danger rpc_status" style="display:none;">UNKNOW</span>
     </div>
 </div>
 
 <script>
 
+    function check_rpc_status_dom(is_up, show_unknow)
+    {
+        document.querySelectorAll('.rpc_status').forEach(element => element.style.display = 'none');
+
+        let status_element_id =  null;
+
+        if(is_up === '1')
+        {
+            status_element_id = 'rpc_status_up';
+        }
+        
+        if(is_up === '0')
+        {
+            status_element_id = 'rpc_status_down';
+        }
+
+        if(!['1', '0'].includes(is_up))
+        {
+            status_element_id = show_unknow ? 'rpc_status_unknow' : 'rpc_status_checking';
+        }
+
+        document.getElementById(status_element_id).style.display = 'inline-block';
+    }
+
     function check_rpc_status()
     {
         $.getJSON('{{ path('app_ajaxcall_is_up') }}', function( data ) {
 
-            $('.rpc_status').hide();
+            let is_up_str_value = data.is_up ? '1' : '0';
 
-            if(data.is_up)
-            {
-                $('#rpc_status_up').show();
-            }
+            check_rpc_status_dom(is_up_str_value, true);
 
-            if(!data.is_up)
-            {
-                $('#rpc_status_down').show();
-            }
+            Cookies.set('rpc_is_up', is_up_str_value);
 
-            setTimeout(check_rpc_status, 5000);
+            setTimeout(check_rpc_status, 5000); //5 seconds
         });
     }
 
+    check_rpc_status_dom('{{ app.request.cookies.get('rpc_is_up') }}', false);
+
     appDefer(function() {
-        setTimeout(check_rpc_status, 1);
+        
+        //Check from ajax call
+
+        setTimeout(check_rpc_status, 0);
     });
+
+    
+
+    
     
 </script>
