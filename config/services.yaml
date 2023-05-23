@@ -11,6 +11,9 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
+            $rpc_hostname: '%env(RPC_HOSTNAME)%'
+            $rpc_port: '%env(int:RPC_PORT)%'
+            $rpc_is_https: '%env(bool:RPC_IS_HTTPS)%'
             $rpc_username: '%env(RPC_USERNAME)%'
             $rpc_password: '%env(RPC_PASSWORD)%'
     # makes classes in src/ available to be used as services
