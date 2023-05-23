@@ -15,3 +15,5 @@ import './bootstrap';
 const $ = require('jquery');
 
 global.$ = global.jQuery = $;
+
+window.appLoaded = true;

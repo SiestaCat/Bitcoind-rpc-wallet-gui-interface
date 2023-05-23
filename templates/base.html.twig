@@ -12,6 +12,17 @@
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
+
+        <script>
+        function appDefer(method) {
+            if (window.appLoaded) {
+                setTimeout(function() { method(); }, 1);
+            } else {
+                setTimeout(function() { appDefer(method) }, 50);
+            }
+        }
+        </script>
+
     </head>
     <body>
         {% if is_granted('ROLE_USER') %}
