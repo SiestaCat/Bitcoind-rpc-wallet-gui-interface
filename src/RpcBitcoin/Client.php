@@ -26,6 +26,23 @@ class Client
         return $this->make_curl_call($method, $params);
     }
 
+
+    public function isUp():bool
+    {
+        $connection = @fsockopen($this->rpc_hostname, $this->rpc_port, $null, $null, self::SOCK_TIMEOUT);
+
+        if (is_resource($connection))
+        {
+            fclose($connection);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
     /**
      * 
      * @param string $method 

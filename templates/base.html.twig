@@ -27,6 +27,7 @@
     <body>
         {% if is_granted('ROLE_USER') %}
             {% include 'nav.html.twig' %}
+            {% include 'rpc_status.html.twig' %}
         {% endif %}
         
         <div class="container-fluid">

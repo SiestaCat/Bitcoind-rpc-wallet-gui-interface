@@ -1,0 +1,36 @@
+<div class="card">
+    <div class="card-body">
+        RPC Status:
+        <span class="badge rounded-pill text-bg-warning rpc_status">Checking...</span>
+        <span id="rpc_status_up" class="badge rounded-pill text-bg-success rpc_status" style="display:none;">UP</span>
+        <span id="rpc_status_down" class="badge rounded-pill text-bg-danger rpc_status" style="display:none;">DOWN</span>
+    </div>
+</div>
+
+<script>
+
+    function check_rpc_status()
+    {
+        $.getJSON('{{ path('app_ajaxcall_is_up') }}', function( data ) {
+
+            $('.rpc_status').hide();
+
+            if(data.is_up)
+            {
+                $('#rpc_status_up').show();
+            }
+
+            if(!data.is_up)
+            {
+                $('#rpc_status_down').show();
+            }
+
+            setTimeout(check_rpc_status, 5000);
+        });
+    }
+
+    appDefer(function() {
+        setTimeout(check_rpc_status, 1);
+    });
+    
+</script>
