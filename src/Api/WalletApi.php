@@ -132,4 +132,12 @@ class WalletApi
             $wallet_name
         ]);
     }
+
+    public function walletpassphrasechange(string $wallet_name, string $oldpassphrase, string $newpassphrase):void
+    {
+        $this->client->callWallet($wallet_name, 'walletpassphrasechange', [
+            $oldpassphrase,
+            $newpassphrase
+        ]);
+    }
 }

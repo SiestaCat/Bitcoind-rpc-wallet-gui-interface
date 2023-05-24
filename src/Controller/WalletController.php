@@ -59,4 +59,24 @@ class WalletController extends AbstractController
 
         return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name], Response::HTTP_SEE_OTHER);
     }
+
+    #[Route('/passphrase_change/{wallet_name}', name: 'app_wallet_passphrase_change', methods: ['POST'])]
+    public function passphrase_change(string $wallet_name, Request $request, WalletApi $walletApi): Response
+    {
+        if ($this->isCsrfTokenValid('passphrase_change'.$wallet_name, $request->request->get('_token'))) {
+            try
+            {
+                $walletApi->walletpassphrasechange($wallet_name, $request->request->get('old_passphrase'), $request->request->get('new_passphrase'));
+                $this->addFlash('success', 'Passphrase changed');
+                return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name]);
+            }
+            catch(\Exception $e)
+            {
+                $this->addFlash('danger', $e->getMessage());
+                return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name]);
+            }
+        } else $this->addFlash('danger', 'Invalid token');
+
+        return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name], Response::HTTP_SEE_OTHER);
+    }
 }

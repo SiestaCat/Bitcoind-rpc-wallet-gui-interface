@@ -5,6 +5,7 @@
 {% block body %}
     <h2>Wallet {{ wallet.name }}</h2>
     {% include 'flash.html.twig' %}
+    {% include 'wallet/passphrasechange.html.twig' %}
     {% include 'wallet/balances.html.twig' %}
     {% include 'wallet/addresses.html.twig' %}
     {% include 'wallet/transactions.html.twig' %}
