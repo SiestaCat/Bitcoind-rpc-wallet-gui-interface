@@ -67,6 +67,7 @@
             </div>
         </div>
     </div>
+    {% if transaction.blockhash is defined %}
     <div class="row g-0">
         <div class="col">
             <div class="card-body p-1">
@@ -79,6 +80,8 @@
             </div>
         </div>
     </div>
+    {% endif %}
+    {% if transaction.blocktime is defined %}
     <div class="row g-0">
         <div class="col">
             <div class="card-body p-1">
@@ -91,6 +94,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     <div class="row g-0">
         <div class="col">
             <div class="card-body p-1">
