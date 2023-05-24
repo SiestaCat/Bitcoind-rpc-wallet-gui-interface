@@ -6,7 +6,7 @@
             <button type="submit" class="btn btn-primary me-4">Create new address</button>
             {% for i,address_type in ['legacy', 'p2sh-segwit', 'bech32'] %}
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="address_type" id="address_type{{ i }}" value="{{ address_type }}">
+                <input class="form-check-input" {{ address_type == 'legacy' ? 'checked' : '' }} type="radio" name="address_type" id="address_type{{ i }}" value="{{ address_type }}">
                 <label class="form-check-label" for="address_type{{ i }}">{{ address_type }}</label>
             </div>
             {% endfor %}
