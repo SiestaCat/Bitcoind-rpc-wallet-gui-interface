@@ -12,9 +12,12 @@ import './styles/global.scss';
 // start the Stimulus application
 import './bootstrap';
 
+import copy from 'copy-to-clipboard';
+
 global.$ = global.jQuery = require('jquery');
 
 global.Cookies = require('js-cookie');
+global.copy = copy;
 
 //Import modal image library
 //Credits: Siniša Grubor https://codepen.io/sinisag/pen/vPEajE
