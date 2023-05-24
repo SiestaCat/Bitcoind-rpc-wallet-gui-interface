@@ -21,6 +21,7 @@
         "build": "encore production --progress"
     },
     "dependencies": {
+        "copy-to-clipboard": "^3.3.3",
         "jquery": "^3.7.0",
         "js-cookie": "^3.0.5",
         "sass": "^1.62.1",
