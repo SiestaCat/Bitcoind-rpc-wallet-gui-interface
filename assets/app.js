@@ -16,4 +16,9 @@ global.$ = global.jQuery = require('jquery');
 
 global.Cookies = require('js-cookie');
 
+//Import modal image library
+//Credits: Siniša Grubor https://codepen.io/sinisag/pen/vPEajE
+import './styles/modal_image.css';
+import './modal_image.js';
+
 window.appLoaded = true;

@@ -1,0 +1,42 @@
+<h3>Addresses</h3>
+<div class="card">
+    <div class="card-body">
+        <form method="post" action="{{ path('app_wallet_generate_address', {'wallet_name': wallet.name}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('generate_address' ~ wallet.name) }}">
+            <button type="submit" class="btn btn-primary me-4">Create new address</button>
+            {% for i,address_type in ['legacy', 'p2sh-segwit', 'bech32'] %}
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="address_type" id="address_type{{ i }}" value="{{ address_type }}">
+                <label class="form-check-label" for="address_type{{ i }}">{{ address_type }}</label>
+            </div>
+            {% endfor %}
+       </form>
+    </div>
+</div>
+{% if wallet.addresses|length == 0 %}
+    <div class="alert alert-warning mt-3" role="alert">
+        No addresses
+    </div>
+{% endif %}
+{% for address in wallet.addresses %}
+<div class="card mt-3">
+    <div class="row g-0">
+        <div class="col">
+            <div class="card-body p-1">
+                <h5 class="card-title m-0">Address:</h5>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1">
+                <h5 class="card-title m-0">{{ address }}</h5>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1 text-end">
+                <button class="btn btn-link btn-sm2">copy</button>
+                <button data-modal-image-src="{{ qr_service.toSrc(address) }}" class="btn btn-link btn-sm2 modal-image-target">QR</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
