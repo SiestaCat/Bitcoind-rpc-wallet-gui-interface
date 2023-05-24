@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Api\GS\Wallet;
 use App\Api\WalletApi;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,9 +15,26 @@ class WalletController extends AbstractController
     #[Route('/show/{wallet_name}', name: 'app_wallet_show')]
     public function show(string $wallet_name, WalletApi $walletApi): Response
     {
+
+        $wallet = new Wallet;
+        $transactions = [];
+
+        try
+        {
+            $wallet = $walletApi->get($wallet_name);
+            $transactions = $walletApi->listtransactions($wallet_name);
+        }
+        catch(\Exception $e)
+        {
+            $this->addFlash('danger', $e->getMessage());
+        }
+
+        
+
         return $this->render('wallet/show.html.twig', [
-            'wallet' => $walletApi->get($wallet_name),
-            'transactions' => $walletApi->listtransactions($wallet_name)
+            'wallet_name' => $wallet_name,
+            'wallet' => $wallet,
+            'transactions' => $transactions
         ]);
     }
 
@@ -68,6 +86,26 @@ class WalletController extends AbstractController
             {
                 $walletApi->walletpassphrasechange($wallet_name, $request->request->get('old_passphrase'), $request->request->get('new_passphrase'));
                 $this->addFlash('success', 'Passphrase changed');
+                return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name]);
+            }
+            catch(\Exception $e)
+            {
+                $this->addFlash('danger', $e->getMessage());
+                return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name]);
+            }
+        } else $this->addFlash('danger', 'Invalid token');
+
+        return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/send/{wallet_name}', name: 'app_wallet_send', methods: ['POST'])]
+    public function send(string $wallet_name, Request $request, WalletApi $walletApi): Response
+    {
+        if ($this->isCsrfTokenValid('wallet_send'.$wallet_name, $request->request->get('_token'))) {
+            try
+            {
+                $walletApi->walletpassphrasechange($wallet_name, $request->request->get('old_passphrase'), $request->request->get('new_passphrase'));
+                $this->addFlash('success', 'Sended');
                 return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name]);
             }
             catch(\Exception $e)

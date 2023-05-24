@@ -1,8 +1,8 @@
 <h3 class="mt-5">Addresses</h3>
 <div class="card">
     <div class="card-body">
-        <form method="post" action="{{ path('app_wallet_generate_address', {'wallet_name': wallet.name}) }}">
-            <input type="hidden" name="_token" value="{{ csrf_token('generate_address' ~ wallet.name) }}">
+        <form method="post" action="{{ path('app_wallet_generate_address', {'wallet_name': wallet_name}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('generate_address' ~ wallet_name) }}">
             <button type="submit" class="btn btn-primary me-4">Create new address</button>
             {% for i,address_type in ['legacy', 'p2sh-segwit', 'bech32'] %}
             <div class="form-check form-check-inline">

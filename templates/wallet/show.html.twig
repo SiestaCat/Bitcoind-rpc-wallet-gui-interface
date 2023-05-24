@@ -1,11 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Wallet {{ wallet.name }}{% endblock %}
+{% block title %}Wallet {{ wallet_name }}{% endblock %}
 
 {% block body %}
-    <h2>Wallet {{ wallet.name }}</h2>
+    <h2>Wallet {{ wallet_name }}</h2>
     {% include 'flash.html.twig' %}
     {% include 'wallet/passphrasechange.html.twig' %}
+    {% include 'wallet/send.html.twig' %}
     {% include 'wallet/balances.html.twig' %}
     {% include 'wallet/addresses.html.twig' %}
     {% include 'wallet/transactions.html.twig' %}

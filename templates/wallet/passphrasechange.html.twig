@@ -1,8 +1,8 @@
 <h3 class="mt-5">Change passphrase</h3>
 <div class="card">
     <div class="card-body">
-        <form method="post" action="{{ path('app_wallet_passphrase_change', {'wallet_name': wallet.name}) }}">
-            <input type="hidden" name="_token" value="{{ csrf_token('passphrase_change' ~ wallet.name) }}">
+        <form method="post" action="{{ path('app_wallet_passphrase_change', {'wallet_name': wallet_name}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('passphrase_change' ~ wallet_name) }}">
             <div class="input-group mb-3">
                 <span class="input-group-text">Old passphrase</span>
                 <input type="password" class="form-control" name="old_passphrase">
