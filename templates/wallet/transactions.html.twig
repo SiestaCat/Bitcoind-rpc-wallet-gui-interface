@@ -1,0 +1,107 @@
+<h3 class="mt-5">Transactions</h3>
+
+{% if transactions|length == 0 %}
+    <div class="alert alert-warning mt-3" role="alert">
+        No transactions
+    </div>
+{% endif %}
+{% for transaction in transactions %}
+<div class="card mt-3">
+    <div class="row g-0">
+        <div class="col">
+            <div class="card-body p-1">
+                <h6 class="card-title m-0">Transaction id:</h6>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1 text-end">
+                <span class="m-0">{{ transaction.txid }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="row g-0">
+        <div class="col">
+            <div class="card-body p-1">
+                <h6 class="card-title m-0">Amount:</h6>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1 text-end">
+                <span class="m-0">{{ transaction.amount }} BTC</span>
+            </div>
+        </div>
+    </div>
+    <div class="row g-0">
+        <div class="col">
+            <div class="card-body p-1">
+                <h6 class="card-title m-0">Category:</h6>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1 text-end">
+                <span class="m-0">{{ transaction.category }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="row g-0">
+        <div class="col">
+            <div class="card-body p-1">
+                <h6 class="card-title m-0">Address:</h6>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1 text-end">
+                <span class="m-0">{{ transaction.address }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="row g-0">
+        <div class="col">
+            <div class="card-body p-1">
+                <h6 class="card-title m-0">Confirmations:</h6>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1 text-end">
+                <span class="m-0">{{ transaction.confirmations }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="row g-0">
+        <div class="col">
+            <div class="card-body p-1">
+                <h6 class="card-title m-0">Blockhash:</h6>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1 text-end">
+                <span class="m-0">{{ transaction.blockhash }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="row g-0">
+        <div class="col">
+            <div class="card-body p-1">
+                <h6 class="card-title m-0">Blocktime:</h6>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1 text-end">
+                <span class="m-0">{{ transaction.blocktime|date('d/m/Y H:i:s') }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="row g-0">
+        <div class="col">
+            <div class="card-body p-1">
+                <h6 class="card-title m-0">Time:</h6>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card-body p-1 text-end">
+                <span class="m-0">{{ transaction.time|date('d/m/Y H:i:s') }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}

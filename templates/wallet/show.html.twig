@@ -5,14 +5,7 @@
 {% block body %}
     <h2>Wallet {{ wallet.name }}</h2>
     {% include 'flash.html.twig' %}
-    <h3>Balances</h3>
-    <div class="card">
-        <div class="card-body">
-            <p class="mb-1">
-                <b>BTC</b> {{ wallet.balance_available }} available<br>
-                <b>BTC</b> {{ wallet.balance_pending }} pending
-            </p>
-        </div>
-    </div>
+    {% include 'wallet/balances.html.twig' %}
     {% include 'wallet/addresses.html.twig' %}
+    {% include 'wallet/transactions.html.twig' %}
 {% endblock %}

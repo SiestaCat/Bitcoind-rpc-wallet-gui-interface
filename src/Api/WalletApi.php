@@ -125,4 +125,11 @@ class WalletApi
         return [];
         
     }
+
+    public function listtransactions(string $wallet_name):array
+    {
+        return $this->client->callWallet($wallet_name, 'listtransactions', [
+            $wallet_name
+        ]);
+    }
 }
