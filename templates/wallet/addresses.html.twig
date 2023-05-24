@@ -4,10 +4,10 @@
         <form method="post" action="{{ path('app_wallet_generate_address', {'wallet_name': wallet_name}) }}">
             <input type="hidden" name="_token" value="{{ csrf_token('generate_address' ~ wallet_name) }}">
             <button type="submit" class="btn btn-primary me-4">Create new address</button>
-            {% for i,address_type in ['legacy', 'p2sh-segwit', 'bech32'] %}
+            {% for address_type,default in addresses_types %}
             <div class="form-check form-check-inline">
-                <input class="form-check-input" {{ address_type == 'legacy' ? 'checked' : '' }} type="radio" name="address_type" id="address_type{{ i }}" value="{{ address_type }}">
-                <label class="form-check-label" for="address_type{{ i }}">{{ address_type }}</label>
+                <input class="form-check-input" {{ default ? 'checked' : '' }} type="radio" name="address_type" id="address_type_{{ address_type }}" value="{{ address_type }}">
+                <label class="form-check-label" for="address_type_{{ address_type }}">{{ address_type }}</label>
             </div>
             {% endfor %}
        </form>

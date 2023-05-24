@@ -12,6 +12,13 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/wallet')]
 class WalletController extends AbstractController
 {
+
+    const ADDRESSES_TYPES = [
+        'legacy' => true, //default checked
+        'p2sh-segwit' => false,
+        'bech32' => false
+    ];
+
     #[Route('/show/{wallet_name}', name: 'app_wallet_show')]
     public function show(string $wallet_name, WalletApi $walletApi): Response
     {
@@ -34,7 +41,8 @@ class WalletController extends AbstractController
         return $this->render('wallet/show.html.twig', [
             'wallet_name' => $wallet_name,
             'wallet' => $wallet,
-            'transactions' => $transactions
+            'transactions' => $transactions,
+            'addresses_types' => self::ADDRESSES_TYPES
         ]);
     }
 
