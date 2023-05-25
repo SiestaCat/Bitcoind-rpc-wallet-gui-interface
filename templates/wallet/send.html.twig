@@ -1,0 +1,227 @@
+<h3 class="mt-5">Send</h3>
+<div class="card">
+    <div class="card-body">
+        <form id="send_form" method="post" action="{{ path('app_wallet_send', {'wallet_name': wallet_name}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('wallet_send' ~ wallet_name) }}">
+            <div class="mb-3">
+                <label for="send_passphrase" class="form-label">Passphrase</label>
+                <input type="password" class="form-control" id="send_passphrase" name="send_passphrase">
+            </div>
+            <div class="mb-3">
+                <label for="send_to_address" class="form-label">To address</label>
+                <input type="text" class="form-control check_fee_event" id="send_to_address" name="send_to_address">
+            </div>
+            <div class="mb-3">
+                <label for="send_amount" class="form-label">Amount</label>
+                <input type="text" class="form-control check_fee_event" id="send_amount" name="send_amount">
+            </div>
+            <div class="mb-3">
+                <label for="send_fee" class="form-label">Fee</label>
+                <select class="form-control check_fee_event" id="send_fee" name="send_fee">
+                    {% for fee in send_fees %}
+                        <option value="{{ fee.btc_kvb }}">
+                            {{ fee.blocks }} blocks
+                            &nbsp;&nbsp;
+                            {{ fee.btc_kvb }} BTC/kvB
+                            &nbsp;&nbsp;
+                            {{ fee.sat_vb }} sat/vB
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input check_fee_event" type="checkbox" value="1" id="subtract_fee_from_amount" name="subtract_fee_from_amount">
+                <label class="form-check-label" for="subtract_fee_from_amount">
+                    Subtract fee from amount
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="1" id="try_send_anyway">
+                <label class="form-check-label" for="try_send_anyway">
+                    Ignore warnings and try to send anyway
+                </label>
+            </div>
+            <div id="send_info" class="row" style="display:none;">
+                <dt class="col-3">Balance:</dt>
+                <dd class="col-9"><span data-send-info-balance>{{ wallet.balance_available }}</span> BTC</dd>
+                <dt class="col-3">Balance after:</dt>
+                <dd class="col-9"><span data-send-info-balance-after>-</span> BTC</dd>
+                <dt class="col-3">Fee:</dt>
+                <dd class="col-9"><span data-send-info-fee>-</span> BTC</dd>
+                <dt class="col-3 send_info_amount_plus_fee">Amount + fee:</dt>
+                <dd class="col-9 send_info_amount_plus_fee"><span data-send-info-amount-plus-fee>-</span> BTC</dd>
+                <dt class="col-3">Amount receive:</dt>
+                <dd class="col-9"><span data-send-info-amount-receive>-</span> BTC</dd>
+            </div>
+            <div id="send_btc_error_message" class="alert alert-danger" role="alert" style="display:none;"></div>
+            <div id="send_btc_success_message" class="alert alert-success" role="alert" style="display:none;"></div>
+            <button id="submit_send_btc" type="button" onclick="if(!this.disabled) { this.disabled = true; sendBtc(); }" disabled class="btn btn-primary mt-4"><span id="submit_btn_label">Confirm &amp; send</span> <span id="submit_btn_count_down"></span></button>
+            <button id="recheck_send_btc" type="button" onclick="checkFeesEvent();" class="btn btn-primary mt-4">Recheck warnings</button>
+       </form>
+    </div>
+</div>
+
+<script>
+
+    var try_send_anyway = document.getElementById('try_send_anyway').checked;
+
+    var send_btc_count_down_interval = null;
+
+    var http_request_check_fee_event = null;
+
+    function showSendBtcError(message, hide_send_info)
+    {
+        $('#send_btc_error_message').show().text(message);
+
+        if(hide_send_info) $('#send_info').hide();
+    }
+
+    function hideSendBtcError()
+    {
+        $('#send_btc_error_message').hide();
+    }
+
+    function startCountDownSendBtn()
+    {
+        if(try_send_anyway) return;
+        let seconds = 5;
+        send_btc_count_down_interval = setInterval(function() {
+            seconds--;
+            $('#submit_btn_count_down').text('(' + seconds + ')');
+            if(seconds === 0)
+            {
+                stopCountDownSendBtn();
+                $('#send_form #submit_send_btc').prop('disabled', false);
+            }
+        }, 1000);
+    }
+
+    function stopCountDownSendBtn()
+    {
+        clearInterval(send_btc_count_down_interval);
+        $('#submit_btn_count_down').text('');
+    }
+
+    function resetCountDownSendBtn()
+    {
+        stopCountDownSendBtn();
+        if(!try_send_anyway) $('#send_form #submit_send_btc').prop('disabled', true);
+    }
+
+    function populate_send_info(json_response)
+    {
+
+        $('#send_info [data-send-info-balance]').text(json_response.balance_available);
+        $('#send_info [data-send-info-fee]').text(json_response.fee);
+        $('#send_info [data-send-info-amount-plus-fee]').text(json_response.send_amount_plus_fee);
+
+        $('#send_info [data-send-info-amount-receive]').text(json_response.amount_receive);
+        $('#send_info [data-send-info-balance-after]').text(json_response.balance_available_after_send);
+        
+        $('#send_info').show();
+    }
+
+    function checkFeesEvent()
+    {
+        $('#send_btc_success_message').hide();
+        resetCountDownSendBtn();
+        if(http_request_check_fee_event !== null) http_request_check_fee_event.abort();
+        
+        let token = '{{ csrf_token('check_send_fee' ~ wallet_name) }}';
+        let post_fields = {
+            '_token' : token,
+            'send_to_address' : $('#send_to_address').val().trim(),
+            'send_amount' : amoutFormat($('#send_amount').val()),
+            'send_fee' : $('#send_fee').val(),
+            'subtract_fee_from_amount' : $('#subtract_fee_from_amount').is(':checked') ? 1 : 0,
+            'try_send_anyway' : try_send_anyway
+        };
+
+        $('#send_amount').val(post_fields.send_amount); //Format amount, allow ony numbers and dots
+
+        if
+        (
+            !
+            (
+                post_fields.send_to_address.length > 0 &&
+                post_fields.send_amount.length > 0
+            )
+        ) return;
+
+        let url = '{{ path('app_wallet_check_send_fee', {'wallet_name' : wallet_name}) }}';
+
+        http_request_check_fee_event = $.post(url, post_fields )
+        .done(function(json_response) {
+            if(json_response.error !== null)
+            {
+                showSendBtcError(json_response.error, json_response.fatal_error);
+            }
+
+            if(json_response.error === null || !json_response.fatal_error)
+            {
+                populate_send_info(json_response);
+            }
+
+            if(json_response.error === null)
+            {
+                startCountDownSendBtn();
+                hideSendBtcError();
+            }
+        })
+        .fail(function() {
+            showSendBtcError('Internal server error', true);
+        })
+        .always(function() {
+            http_request_check_fee_event = null;
+        });
+    }
+
+    function amoutFormat(amount)
+    {
+        return amount.replace(/[^\d.]|\.(?=.*\.)/g, '');
+    }
+
+    function sendBtc()
+    {
+        let submit_btn_default_text = $('#submit_btn_label').text();
+
+        $('#submit_btn_label').text('Loading...');
+
+        $.post('{{ path('app_wallet_send', {'wallet_name' : wallet_name}) }}', $('#send_form').serialize() )
+        .done(function(json_response) {
+            if(json_response.error === null)
+            {
+                $('#send_btc_success_message').html('Sended successfully.<br>Amount: '+json_response.amount_sended+' BTC<br>txid: ' + json_response.txid).show();
+            }
+
+            if(json_response.error !== null)
+            {
+                showSendBtcError(json_response.error, true);
+            }
+        })
+        .fail(function() {
+            showSendBtcError('Internal server error', true);
+        })
+        .always(function() {
+            $('#submit_btn_label').text(submit_btn_default_text);
+            $('#send_form #submit_send_btc').prop('disabled', false);
+        });;
+    }
+
+    appDefer(function() {
+        $("#send_form #try_send_anyway").on('change', function(){
+            try_send_anyway = document.getElementById('try_send_anyway').checked;
+
+            if(try_send_anyway)
+            {
+                $('#send_form #submit_send_btc').prop('disabled', false);
+            }
+
+            if(!try_send_anyway) checkFeesEvent();
+        });
+
+        $("#send_form .check_fee_event").on('keyup change', function(){
+            checkFeesEvent();
+        });
+    });
+</script>

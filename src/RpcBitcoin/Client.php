@@ -9,6 +9,8 @@ class Client
 
     const JSON_RPC = '1.0';
 
+    private ?string $last_response = null;
+
     public function __construct(private string $rpc_hostname, private int $rpc_port, private string $rpc_username, private string $rpc_password, private bool $rpc_is_https)
     {}
 
@@ -35,6 +37,11 @@ class Client
         {
             return false;
         }
+    }
+
+    public function getLastResponse():?string
+    {
+        return $this->last_response;
     }
 
 
@@ -66,6 +73,8 @@ class Client
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         curl_close($ch);
+
+        if(is_string($response) || $response === null) $this->last_response = $response;
 
         if($httpcode === 401) throw new AuthException('Invalid login');
 
