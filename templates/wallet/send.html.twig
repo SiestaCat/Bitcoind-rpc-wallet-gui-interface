@@ -35,12 +35,51 @@
                     Subtract fee from amount
                 </label>
             </div>
-            <button type="submit" disabled class="btn btn-primary mt-4">Send</button>
+            <div id="send_info" class="row" style="display:none;">
+                <dt class="col-3">Balance:</dt>
+                <dd class="col-9"><span data-send-info-balance>{{ wallet.balance_available }}</span> BTC</dd>
+                <dt class="col-3">Balance after:</dt>
+                <dd class="col-9"><span data-send-info-balance-after>-</span> BTC</dd>
+                <dt class="col-3">Fee:</dt>
+                <dd class="col-9"><span data-send-info-fee>-</span> BTC</dd>
+                <dt class="col-3 send_info_amount_plus_fee">Amount + fee:</dt>
+                <dd class="col-9 send_info_amount_plus_fee"><span data-send-info-amount-plus-fee>-</span> BTC</dd>
+                <dt class="col-3">Amount receive:</dt>
+                <dd class="col-9"><span data-send-info-amount-receive>-</span> BTC</dd>
+            </div>
+            <div id="send_btc_error_message" class="alert alert-danger" role="alert" style="display:none;"></div>
+            <button type="submit" disabled class="btn btn-primary mt-4">Confirm &amp; send <span id="submit_btn_counter"></span></button>
        </form>
     </div>
 </div>
 
 <script>
+
+    function showSendBtcError(message, hide_send_info)
+    {
+        $('#send_btc_error_message').show().text(message);
+
+        if(hide_send_info) $('#hide_send_info').hide();
+    }
+
+    function hideSendBtcError()
+    {
+        $('#send_btc_error_message').hide();
+    }
+
+    function populate_send_info(json_response)
+    {
+
+        $('#send_info [data-send-info-balance]').text(json_response.balance_available);
+        $('#send_info [data-send-info-fee]').text(json_response.fee);
+        $('#send_info [data-send-info-amount-plus-fee]').text(json_response.send_amount_plus_fee);
+
+        $('#send_info [data-send-info-amount-receive]').text(json_response.amount_receive);
+        $('#send_info [data-send-info-balance-after]').text(json_response.balance_available_after_send);
+        
+        $('#send_info').show();
+    }
+
     appDefer(function() {
         var http_request_check_fee_event = null;
         $("#send_form .check_fee_event").on('keyup change', function(){
@@ -64,9 +103,30 @@
                 )
             ) return;
 
+            
+
             let url = '{{ path('app_wallet_check_send_fee', {'wallet_name' : wallet_name}) }}';
 
             http_request_check_fee_event = $.post(url, post_fields )
+            .done(function(json_response) {
+                if(json_response.error !== null)
+                {
+                    showSendBtcError(json_response.error, json_response.fatal_error);
+                }
+
+                if(json_response.error === null || !json_response.fatal_error)
+                {
+                    populate_send_info(json_response);
+                }
+
+                if(json_response.error === null)
+                {
+                    hideSendBtcError();
+                }
+            })
+            .fail(function() {
+                showSendBtcError('Internal server error', true);
+            })
             .always(function() {
                 http_request_check_fee_event = null;
             });

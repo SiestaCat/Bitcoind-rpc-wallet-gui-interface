@@ -60,44 +60,78 @@ class WalletController extends AbstractController
     #[Route('/check_send_fee/{wallet_name}', name: 'app_wallet_check_send_fee', methods: ['POST'])]
     public function check_send_fee(string $wallet_name, Request $request, WalletApi $walletApi): JsonResponse
     {
+
+        $json_response = (object) ['error' => 'Invalid token', 'fatal_error' => true];
+
         if ($this->isCsrfTokenValid('check_send_fee'.$wallet_name, $request->request->get('_token'))) {
-            try
+
+            $balance_available = $walletApi->getbalances($wallet_name)->available;
+
+            $send_amount = $request->request->get('send_amount');
+
+            $send_fee = $request->request->get('send_fee');
+
+            $subtract_fee_from_amount = $request->request->get('subtract_fee_from_amount') === '1';
+
+            $json_response = (object)
+            [
+                'fee' => null,
+                'send_amount_plus_fee' => null,
+                'balance_available' => $balance_available,
+                'balance_available_after_send' => $balance_available,
+                'amount_receive' => $send_amount,
+                'fatal_error' => false,
+                'error' => null
+            ];
+
+            if(bccomp($send_amount, $balance_available, 99) === 1)
             {
-                $send_to_address = $request->request->get('send_to_address');
-                $send_amount = $request->request->get('send_amount');
-                $send_fee = $request->request->get('send_fee');
-                $subtract_fee_from_amount = $request->request->get('subtract_fee_from_amount') === '1';
-                $response = $walletApi->getFee($wallet_name, $send_fee, $send_to_address, $send_amount);
+                $json_response->error = 'Insufficient funds. Send amount is higher than your available balance';
+                return new JsonResponse($json_response);
+            }
 
-                $balance_available = $walletApi->getbalances($wallet_name)->available;
+            try
+            {                                
+                $response = $walletApi->getFee($wallet_name, $send_fee, $request->request->get('send_to_address'), $send_amount);
 
-                $json_response = (object)
-                [
-                    'fee' => $response->fee,
-                    'send_amount_plus_fee' => rtrim(bcadd($send_amount, $response->fee, 99), '0'),
-                    'balance_available' => $balance_available
-                ];
+                $json_response->fee = $response->fee;
 
-                $json_response->balance_fee_diff = rtrim(bcsub($balance_available, $json_response->send_amount_plus_fee, 99), '0');
+                $json_response->send_amount_plus_fee = rtrim(bcadd($send_amount, $json_response->fee, 99), '0');
+
+                $json_response->balance_available_after_send = rtrim(bcsub($balance_available, $json_response->send_amount_plus_fee, 99), '0');
 
                 if(!$subtract_fee_from_amount)
                 {
                     
-                    if(bccomp($json_response->send_amount_plus_fee, $balance_available, 99) === 1) $json_response->error = 'Insufficient funds ' . $json_response->balance_fee_diff;
+                    if(bccomp($json_response->send_amount_plus_fee, $balance_available, 99) === 1)
+                    {
+                        //$json_response->balance_fee_diff = rtrim(bcsub($balance_available, $json_response->send_amount_plus_fee, 99), '0'); //IDEA
+                        $json_response->error = 'Insufficient funds. Please select "Substract fee from amount"';
+                    }
                 }
 
-                return new JsonResponse($json_response);
-                
+                if($subtract_fee_from_amount)
+                {
+                    $json_response->amount_receive = rtrim(bcsub($send_amount, $json_response->fee, 99), '0');
+                }
             }
             catch(\Exception $e)
             {
-                if(str_contains($e->getMessage(), 'Insufficient funds') || str_contains($e->getMessage(), 'The transaction amount is too small to pay the fee'))
+                $json_error_message = $e->getMessage();
+
+                $json_error_message_decoded = json_decode($json_error_message);
+
+                if(is_object($json_error_message_decoded) && property_exists($json_error_message_decoded, 'message'))
                 {
-                    return new JsonResponse(['error' => 'Insufficient funds']);
+                    $json_error_message = $json_error_message_decoded->message;
                 }
-                else throw $e;
+
+                $json_response->error = 'RPC ERROR RESPONSE: ' . $json_error_message;
+                $json_response->fatal_error = true;
             }
-        } else return new JsonResponse(['error' => 'Invalid token']);
+        }
+
+        return new JsonResponse($json_response);
     }
 
     #[Route('/load/{wallet_name}', name: 'app_wallet_load', methods: ['POST'])]
