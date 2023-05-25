@@ -1,0 +1,75 @@
+<h3 class="mt-5">Send</h3>
+<div class="card">
+    <div class="card-body">
+        <form id="send_form" method="post" action="{{ path('app_wallet_send', {'wallet_name': wallet_name}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('wallet_send' ~ wallet_name) }}">
+            <div class="mb-3">
+                <label for="send_passphrase" class="form-label">Passphrase</label>
+                <input type="password" class="form-control" id="send_passphrase" name="send_passphrase">
+            </div>
+            <div class="mb-3">
+                <label for="send_to_address" class="form-label">To address</label>
+                <input type="text" class="form-control check_fee_event" id="send_to_address" name="send_to_address">
+            </div>
+            <div class="mb-3">
+                <label for="send_amount" class="form-label">Amount</label>
+                <input type="text" class="form-control check_fee_event" id="send_amount" name="send_amount">
+            </div>
+            <div class="mb-3">
+                <label for="send_fee" class="form-label">Fee</label>
+                <select class="form-control check_fee_event" id="send_fee" name="send_fee">
+                    {% for fee in send_fees %}
+                        <option value="{{ fee.btc_kvb }}">
+                            {{ fee.blocks }} blocks
+                            &nbsp;&nbsp;
+                            {{ fee.btc_kvb }} BTC/kvB
+                            &nbsp;&nbsp;
+                            {{ fee.sat_vb }} sat/vB
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input check_fee_event" type="checkbox" value="1" id="subtract_fee_from_amount" name="subtract_fee_from_amount">
+                <label class="form-check-label" for="subtract_fee_from_amount">
+                    Subtract fee from amount
+                </label>
+            </div>
+            <button type="submit" disabled class="btn btn-primary mt-4">Send</button>
+       </form>
+    </div>
+</div>
+
+<script>
+    appDefer(function() {
+        var http_request_check_fee_event = null;
+        $("#send_form .check_fee_event").on('keyup change', function(){
+            if(http_request_check_fee_event !== null) http_request_check_fee_event.abort();
+            
+            let token = '{{ csrf_token('check_send_fee' ~ wallet_name) }}';
+            let post_fields = {
+                '_token' : token,
+                'send_to_address' : $('#send_to_address').val().trim(),
+                'send_amount' : $('#send_amount').val().trim(),
+                'send_fee' : $('#send_fee').val(),
+                'subtract_fee_from_amount' : $('#subtract_fee_from_amount').is(':checked') ? 1 : 0
+            };
+
+            if
+            (
+                !
+                (
+                    post_fields.send_to_address.length > 0 &&
+                    post_fields.send_amount.length > 0
+                )
+            ) return;
+
+            let url = '{{ path('app_wallet_check_send_fee', {'wallet_name' : wallet_name}) }}';
+
+            http_request_check_fee_event = $.post(url, post_fields )
+            .always(function() {
+                http_request_check_fee_event = null;
+            });
+        });
+    });
+</script>
