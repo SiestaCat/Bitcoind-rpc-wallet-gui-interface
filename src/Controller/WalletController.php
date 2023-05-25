@@ -92,13 +92,19 @@ class WalletController extends AbstractController
 
             try
             {                                
-                $response = $walletApi->getFee($wallet_name, $send_fee, $request->request->get('send_to_address'), $send_amount);
+                $response = $walletApi->getFee($wallet_name, $send_fee, $request->request->get('send_to_address'), $send_amount, $subtract_fee_from_amount);
 
                 $json_response->fee = $response->fee;
 
                 $json_response->send_amount_plus_fee = rtrim(bcadd($send_amount, $json_response->fee, 99), '0');
 
-                $json_response->balance_available_after_send = rtrim(bcsub($balance_available, $json_response->send_amount_plus_fee, 99), '0');
+                $json_response->balance_available_after_send = 
+                $subtract_fee_from_amount
+                ?
+                rtrim(bcsub($balance_available, $send_amount, 99), '0')
+                :
+                rtrim(bcsub($balance_available, $json_response->send_amount_plus_fee, 99), '0')
+                ;
 
                 if(!$subtract_fee_from_amount)
                 {
@@ -126,7 +132,7 @@ class WalletController extends AbstractController
                     $json_error_message = $json_error_message_decoded->message;
                 }
 
-                $json_response->error = 'RPC ERROR RESPONSE: ' . $json_error_message;
+                $json_response->error = 'RPC ERROR RESPONSE: ' . self::exceptionToJsonErrorMessage($e);
                 $json_response->fatal_error = true;
             }
         }
@@ -195,28 +201,71 @@ class WalletController extends AbstractController
     }
 
     #[Route('/send/{wallet_name}', name: 'app_wallet_send', methods: ['POST'])]
-    public function send(string $wallet_name, Request $request, WalletApi $walletApi): Response
+    public function send(string $wallet_name, Request $request, WalletApi $walletApi): JsonResponse
     {
+
+        $json_response = (object) ['error' => 'Invalid token'];
+
         if ($this->isCsrfTokenValid('wallet_send'.$wallet_name, $request->request->get('_token'))) {
+
             try
             {
-                $walletApi->send
+                $btc_kvb_fee_rate = $request->request->get('send_fee');
+
+                $send_amount = $request->request->get('send_amount');
+
+                $subtract_fee_from_amount = $request->request->get('subtract_fee_from_amount') === '1';
+
+                if(!$walletApi->settxfee($wallet_name, $btc_kvb_fee_rate))
+                {
+                    $json_response->error = 'Unable to set tx fee, settxfee returns false. Response: ' . $walletApi->getClient()->getLastResponse();
+                    return new JsonResponse($json_response);
+                }
+
+                $walletApi->walletpassphrase($wallet_name, $request->request->get('send_passphrase'), 5);
+
+                $send_response = $walletApi->sendtoaddress
                 (
                     $wallet_name,
                     $request->request->get('send_to_address'),
-                    $request->request->get('send_amount'),
-                    $request->request->get('send_fee')
+                    $send_amount,
+                    $subtract_fee_from_amount
                 );
-                $this->addFlash('success', 'Sended');
-                return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name]);
+
+                $walletApi->walletlock($wallet_name);
+
+                $walletApi->settxfee($wallet_name, 0);
+
+                $txid = is_string($send_response) ? $send_response : $send_response->txid;
+
+                $json_response->error = null;
+                $json_response->txid = $txid;
+                $json_response->amount_sended = $send_amount;
+
+                return new JsonResponse($json_response);
             }
             catch(\Exception $e)
             {
-                $this->addFlash('danger', $e->getMessage());
-                return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name]);
+                $json_response->error = self::exceptionToJsonErrorMessage($e);
             }
-        } else $this->addFlash('danger', 'Invalid token');
+        }
 
-        return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name], Response::HTTP_SEE_OTHER);
+        return new JsonResponse($json_response);
+
+        //return $this->redirectToRoute('app_wallet_show', ['wallet_name' => $wallet_name], Response::HTTP_SEE_OTHER);
+    }
+
+    private static function exceptionToJsonErrorMessage(\Exception $e)
+    {
+        $json_error_message = $e->getMessage();
+
+        $json_error_message_decoded = json_decode($json_error_message);
+
+        if(is_object($json_error_message_decoded) && property_exists($json_error_message_decoded, 'message'))
+        {
+            $json_error_message = $json_error_message_decoded->message;
+        }
+
+        return $json_error_message;
     }
 }

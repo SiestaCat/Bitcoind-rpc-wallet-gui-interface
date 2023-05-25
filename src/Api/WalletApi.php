@@ -14,6 +14,11 @@ class WalletApi
     public function __construct(private Client $client, private Rawtransactions $rawtransactions)
     {}
 
+    public function getClient():Client
+    {
+        return $this->client;
+    }
+
     /**
      * 
      * @return Wallet[] 
@@ -69,7 +74,7 @@ class WalletApi
 
     public function getbalances(string $wallet_name):\stdClass
     {
-        $balances = (object) ['available' => '0', 'pending' => '0'];
+        $balances = (object) ['available' => '0.00000000', 'pending' => '0.00000000'];
         $getbalances = $this->client->callWallet($wallet_name, 'getbalances');
         if(property_exists($getbalances, 'mine'))
         {
@@ -152,27 +157,36 @@ class WalletApi
         ]);
     }
 
-    public function send(string $wallet_name, string $address, string $amount, string $fee_rate):bool
+    public function settxfee(string $wallet_name, mixed $amount):bool
     {
-        $result = $this->client->callWallet($wallet_name, 'send', [
-            (
-                (object)
-                [
-                    $address => $amount
-                ]
-            ),
-            null,
-            null,
-            intval($fee_rate)
+        return $this->client->callWallet($wallet_name, 'settxfee', [
+            $amount
         ]);
-
-        return $result->complete;
     }
 
-    public function walletpassphrase(string $wallet_name, string $passphrase):void
+    public function sendtoaddress(string $wallet_name, string $address, string $amount, bool $subtract_fee_from_amount):string
+    {
+        $sendtoaddress = $this->client->callWallet($wallet_name, 'sendtoaddress', [
+            $address,
+            $amount,
+            null,
+            null,
+            $subtract_fee_from_amount
+        ]);
+
+        return $sendtoaddress;
+    }
+
+    public function walletlock(string $wallet_name):void
+    {
+        $this->client->callWallet($wallet_name, 'walletlock');
+    }
+
+    public function walletpassphrase(string $wallet_name, string $passphrase, int $timeout = 1):void
     {
         $this->client->callWallet($wallet_name, 'walletpassphrase', [
-            $passphrase
+            $passphrase,
+            $timeout
         ]);
     }
 
@@ -212,7 +226,7 @@ class WalletApi
         return $fees;
     }
 
-    public function getFee(string $wallet_name, string $feeRate, string $address, string $amount):\stdClass
+    public function getFee(string $wallet_name, string $feeRate, string $address, string $amount, bool $subtract_fee_from_amount):\stdClass
     {
         $outputs = [];
 
@@ -226,7 +240,7 @@ class WalletApi
             0,
             (object) [
                 'feeRate' => $feeRate,
-                'subtractFeeFromOutputs' => [0]
+                'subtractFeeFromOutputs' => ($subtract_fee_from_amount ? [0] : [])
             ]
         ]);
     }
