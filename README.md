@@ -52,6 +52,14 @@ php -S 0.0.0.0:8000 -t public
 ```
 Open in browser https://localhost:8000/
 
+## LICENSE
+
+Apache License 2.0
+
+ABSOLUTELY NO WARRANTY
+
+See LICENSE file
+
 ## Screenshoots
 
 ![localhost_8000_login](https://github.com/SiestaCat/Bitcoind-rpc-wallet-gui-interface/assets/53893905/87ce3362-d873-4aed-9ab0-d8a9c32ab047)
