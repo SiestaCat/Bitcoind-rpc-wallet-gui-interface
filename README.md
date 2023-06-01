@@ -7,7 +7,8 @@ Basic bitcoin rpc client for wallets with symfony 6.
 - Create wallet
 - Create address for wallet
 - Show BTC balance
-- Send (in progress..)
+- Change passphrase
+- Send
 
 ## Requirements
 
