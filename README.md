@@ -15,7 +15,7 @@ Basic bitcoin rpc client for wallets with symfony 6.
 
 - PHP 8
 - Composer
-- NPM
+- NPM 18
 
 ## Bitcoind rpc example
 
@@ -27,7 +27,7 @@ For this example, hashed password `77ba8bfe64e771ef76fc72a02ccf12bf$dad5b22c0503
 
 ## Install
 ```
-git clone git@github.com:SiestaCat/Bitcoind-rpc-wallet-gui-interface.git
+git clone https://github.com/SiestaCat/Bitcoind-rpc-wallet-gui-interface.git
 cd Bitcoind-rpc-wallet-gui-interface
 composer install
 npm ci
