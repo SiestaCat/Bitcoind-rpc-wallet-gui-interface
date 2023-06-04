@@ -4,6 +4,7 @@ Basic bitcoin rpc client for wallets with symfony 6.
 ## Features
 
 - Wallets list
+	- Load wallet
 - Create wallet
 - Create address for wallet
 - Generate QR for address
